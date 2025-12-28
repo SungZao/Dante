@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, user-scalable=no">
+<title>Windows 95</title>
+
+<style>
+* {
+  box-sizing: border-box;
+  user-select: none;
+  font-family: "MS Sans Serif", Tahoma, sans-serif;
+}
+
+body {
+  margin: 0;
+  width: 100vw;
+  height: 100vh;
+  background: #008080;
+  overflow: hidden;
+  filter: contrast(1.1) saturate(1.1);
+    display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+
+/* ===== CRT ===== */
+.crt {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+.crt::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(255,255,255,0.05),
+    rgba(255,255,255,0.05) 1px,
+    rgba(0,0,0,0.15) 2px
+  );
+}
+.crt::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(255,255,255,0.05) 0%,
+    rgba(0,0,0,0.4) 75%,
+    rgba(0,0,0,0.7) 100%
+  );
+}
+
+/* ===== DESKTOP ===== */
+.desktop {
+  position: absolute;
+  inset: 0;
+  padding: 10px;
+}
+
+.icon {
+  width: 72px;
+  text-align: center;
+  color: white;
+  margin-bottom: 20px;
+}
+.icon img {
+  width: 32px;
+  image-rendering: pixelated;
+}
+.icon span {
+  display: block;
+  margin-top: 5px;
+  font-size: 12px;
+}
+
+/* ===== TASKBAR ===== */
+.taskbar {
+  position: absolute;
+  bottom: 0;
+    left: 0;
+  width: 100%;
+  height: 40px;
+  z-index: 9999;
+  background: #c0c0c0;
+  border-top: 2px solid #fff;
+  display: flex;
+  align-items: center;
+  padding: 2px;
+}
+.start {
+  background: #c0c0c0;
+  border: 2px outset #fff;
+  padding: 5px 10px;
+  font-weight: bold;
+}
+
+/* ===== WINDOW ===== */
+.window {
+  position: absolute;
+  background: black;
+  border: 2px solid #c0c0c0;
+  display: none;
+}
+.title-bar {
+  height: 25px;
+  background: #000080;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 5px;
+  font-weight: bold;
+  cursor: move;
+}
+.title-bar button {
+  background: #c0c0c0;
+  border: 2px outset #fff;
+  width: 22px;
+  height: 20px;
+}
+
+/* ===== TERMINAL ===== */
+.terminal {
+  padding: 10px;
+  color: #fff;
+  font-family: "Courier New", monospace;
+  font-size: 14px;
+  height: calc(100% - 25px);
+  overflow-y: auto;
+}
+.line { display: flex; }
+.prompt { margin-right: 5px; }
+input.cmd {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: white;
+  flex: 1;
+}
+
+/* ===== EXPLORER ===== */
+.menu-bar {
+  background: #c0c0c0;
+  padding: 3px 6px;
+  font-size: 13px;
+  border-bottom: 2px solid #808080;
+}
+.explorer-content {
+  background: #fff;
+  height: calc(100% - 70px);
+  padding: 10px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 64px);
+  gap: 15px;
+}
+.file {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  font-size: 12px;
+  color: black;
+  cursor: default;
+}
+
+.file img {
+  width: 32px;
+  image-rendering: pixelated;
+}
+.status-bar {
+  background: #c0c0c0;
+  border-top: 2px solid #808080;
+  padding: 3px 6px;
+  font-size: 12px;
+}
+
+/* ===== NOTEPAD ===== */
+.notepad {
+  background: #fff;
+  color: black;
+  height: calc(100% - 25px);
+  padding: 10px;
+  font-family: "Courier New", monospace;
+  white-space: pre-wrap;
+}
+
+#screen {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+
+
+</style>
+</head>
+
+<body>
+
+
+
+<div id="screen">
+<div class="desktop">
+  <div class="icon" ondblclick="openExplorer('computer')">
+    <img src="https://win98icons.alexmeub.com/icons/png/computer_explorer-0.png">
+    <span>My Computer</span>
+  </div>
+
+  <div class="icon" ondblclick="openExplorer('recycle')">
+    <img src="https://win98icons.alexmeub.com/icons/png/recycle_bin_empty-0.png">
+    <span>Recycle Bin</span>
+  </div>
+
+  <div class="icon" ondblclick="openTerminal()">
+    <img src="https://win98icons.alexmeub.com/icons/png/console_prompt-0.png">
+    <span>Terminal</span>
+  </div>
+</div>
+
+<div class="taskbar">
+  <div class="start">Start</div>
+</div>
+
+<!-- TERMINAL -->
+<div class="window" id="terminalWindow" style="top:100px; left:150px; width:620px; height:360px;">
+  <div class="title-bar" id="terminalBar">
+    <span>C:\ Command Prompt</span>
+    <button onclick="closeTerminal()">X</button>
+  </div>
+  <div class="terminal" id="terminal"></div>
+</div>
+
+
+
+<!-- NOTEPAD -->
+<div class="window" id="notepadWindow" style="top:180px; left:280px; width:360px;">
+
+  <div class="title-bar" id="notepadBar">
+    <span>Saber - Notepad</span>
+    <button onclick="closeNotepad()">X</button>
+  </div>
+  <div class="notepad" id="notepadContent">Você já pensou no sentido da vida?
+Nunca foi algo que nós quisemos… mas sempre foi o desejo dele.
+Já sentiu raiva ao ver o próprio reflexo no espelho?
+ Seis vezes batemos.
+ Seis vezes o chamamos.
+ Seis vezes imploramos.
+</div>
+</div>
+
+
+
+<div class="window" id="audioWindow" style="top:200px; left:300px; width:320px;">
+  <div class="title-bar" id="audioBar">
+    <span id="audioTitle">Sound Player</span>
+    <button onclick="closeAudio()">X</button>
+  </div>
+
+  <div style="background:#c0c0c0; padding:10px; font-size:13px;">
+    <audio id="audioPlayer" controls style="width:100%;"></audio>
+  </div>
+</div>
+
+
+
+
+<div class="crt"></div>
+</div>
+
+
+
+
+
+<script>
+  const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+
+let topZ = 10;
+
+function bringToFront(win) {
+  topZ++;
+  win.style.zIndex = topZ;
+}
+
+
+
+/* ===== TERMINAL ===== */
+const terminal = document.getElementById("terminal");
+function openTerminal() {
+  const win = document.getElementById("terminalWindow");
+  win.style.display = "block";
+  bringToFront(win);
+  if (!terminal.innerHTML) {
+    print("Microsoft(R) Windows 95");
+    print("(C) Copyright Microsoft Corp 1981-1995.");
+    newLine();
+  }
+}
+function closeTerminal() {
+  document.getElementById("terminalWindow").style.display = "none";
+}
+function print(text) {
+  const d = document.createElement("div");
+  d.textContent = text;
+  terminal.appendChild(d);
+}
+function newLine() {
+  const line = document.createElement("div");
+  line.className = "line";
+  const p = document.createElement("span");
+  p.className = "prompt";
+  p.textContent = "C:\\>";
+  const i = document.createElement("input");
+  i.className = "cmd";
+  i.onkeydown = e => {
+    if (e.key === "Enter") {
+      i.disabled = true;
+      handleCommand(i.value.trim().toLowerCase());
+      newLine();
+      terminal.scrollTop = terminal.scrollHeight;
+    }
+  };
+  line.append(p, i);
+  terminal.appendChild(line);
+  if (!isMobile) i.focus();
+}
+function handleCommand(cmd) {
+  if (cmd === "help") print("Commands: help dir cd cls");
+  else if (cmd === "dir") print("WINDOWS SYSTEM USERS AUTOEXEC.BAT");
+  else if (cmd.startsWith("cd")) print("Directory changed.");
+  else if (cmd === "cls") terminal.innerHTML = "";
+  else if (cmd === "eleobserva") print("cocô, bosta, fezes… pum, peido, flatulência… mijo, xixi, urina…");
+  else if (cmd) print(`'${cmd}' is not recognized.`);
+}
+
+/* ===== TERMINAL DRAG ===== */
+makeDraggable(
+  document.getElementById("terminalWindow"),
+  document.getElementById("terminalBar")
+);
+
+/* ===== EXPLORER ===== */
+
+
+const folders = {
+  computer: [
+  { name: "C:", icon: "hdd", action: "openC" },
+  { name: "CD-ROM", icon: "cd" }
+],
+
+  recycle: [
+    { name: "66", icon: "notepad", action: "openSaber" }
+  ]
+};
+
+function openC() {
+  openFolderWindow("C:");
+}
+
+
+const tree = {
+  "C:": [
+    { name: "Raízes", locked: true, password: "ele observa", next: "raízes" }
+  ],
+
+  "raízes": [
+    { name: "eleobserva", locked: true, password: "ilusão", next: "eleobserva" },
+  {
+    name: "ele observa.wav",
+    type: "audio",
+    src: "Eleobserva.mp3"
+  }
+  ],
+  "eleobserva": [
+    { name: "ilusão", locked: true, password: "noschamamos", next: "ilusão" },
+  {
+    name: "ilusão.wav",
+    type: "audio",
+    src: "ilusão_.mp3"
+  }
+  ],
+  "ilusão": [
+    { name: "noschamamos", locked: true, password: "fécega", next: "nós chamamos" },
+  {
+    name: "nóschamamos.wav",
+    type: "audio",
+    src: "nóschamamos_.mp3"
+  }
+  ],
+  "nós chamamos": [
+    { name: "fé cega", locked: true, password: "Apostasia", next: "fé cega" },
+  {
+    name: "fécega.wav",
+    type: "audio",
+    src: "fécega.mp3"
+  }
+  ],
+  "fé cega": [
+    { name: "Apostasia", locked: true, password: "Obediência", next: "Apostasia" },
+  {
+    name: "apostasia.wav",
+    type: "audio",
+    src: "apostasia.mp3"
+  }
+  ],
+  "Apostasia": [
+    { name: "Obediência", locked: true, password: "Prosélito", next: "Obediência" },
+  {
+    name: "Obediência.wav",
+    type: "audio",
+    src: "obediência_.mp3"
+  }
+  ],
+  "Obediência": [
+    { name: "Prosélito", locked: true, password: "Submissão", next: "Prosélito" },
+  {
+    name: "Prosélito.wav",
+    type: "audio",
+    src: "Prosélito_.mp3"
+  }
+  ],
+  "Prosélito": [
+  {
+    name: "Submissão.wav",
+    type: "audio",
+    src: "Submissão_.mp3"
+  }
+  ],
+
+
+
+
+
+
+
+};
+
+
+function openFolderWindow(folderName) {
+  explorerCount++;
+
+  const win = document.createElement("div");
+  win.className = "window";
+  win.style.display = "block";
+  bringToFront(win);
+  win.style.width = "640px";
+  win.style.height = "380px";
+  win.style.left = 220 + explorerCount * 15 + "px";
+  win.style.top = 140 + explorerCount * 15 + "px";
+
+  win.innerHTML = `
+    <div class="title-bar">
+      <span>${folderName}</span>
+      <button>X</button>
+    </div>
+    <div class="menu-bar">File Edit View Tools Help</div>
+    <div class="explorer-content"></div>
+    <div class="status-bar"></div>
+  `;
+
+  document.body.appendChild(win);
+  win.querySelector("button").onclick = () => win.remove();
+
+  const content = win.querySelector(".explorer-content");
+  const status = win.querySelector(".status-bar");
+
+(tree[folderName] || []).forEach(f => {
+  const d = document.createElement("div");
+  d.className = "file";
+
+  const i = document.createElement("img");
+
+  if (f.type === "audio") {
+    i.src = "https://win98icons.alexmeub.com/icons/png/soundgrn-4.png";
+
+    d.ondblclick = () => openAudio(f.name, f.src);
+  } else {
+    i.src = "https://win98icons.alexmeub.com/icons/png/directory_closed-0.png";
+    d.ondblclick = () => {
+      if (f.locked) openPasswordPrompt(f, folderName);
+      else openFolderWindow(f.name);
+    };
+  }
+
+  const s = document.createElement("span");
+  s.textContent = f.name;
+
+  d.append(i, s);
+  content.appendChild(d);
+});
+
+
+  status.textContent = (tree[folderName]?.length || 0) + " objects";
+
+  makeDraggable(win, win.querySelector(".title-bar"));
+}
+
+function openPasswordPrompt(folder, parent) {
+  const win = document.createElement("div");
+  win.className = "window";
+  win.style.width = "320px";
+  win.style.left = "40%";
+  win.style.top = "30%";
+  win.style.display = "block";
+  bringToFront(win);
+
+  win.innerHTML = `
+    <div class="title-bar">
+      <span>Enter Network Password</span>
+      <button>X</button>
+    </div>
+    <div style="padding:15px; background:#c0c0c0; font-size:13px;">
+      <p>Enter password for <b>${folder.name}</b>:</p>
+      <input id="pwd" type="password" style="width:100%; margin-bottom:10px;">
+      <div style="text-align:right;">
+        <button id="ok">OK</button>
+        <button id="cancel">Cancel</button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(win);
+
+  win.querySelector("button").onclick = () => win.remove();
+  win.querySelector("#cancel").onclick = () => win.remove();
+
+  const pwdInput = win.querySelector("#pwd");
+
+function confirmPassword() {
+  const typed = normalizeText(pwdInput.value);
+  const correct = normalizeText(folder.password);
+
+  if (typed === correct) {
+    win.remove();
+    openFolderWindow(folder.next);
+  } else {
+    alert("Access denied.");
+  }
+}
+
+win.querySelector("#ok").onclick = confirmPassword;
+
+// ENTER funciona
+pwdInput.addEventListener("keydown", e => {
+  if (e.key === "Enter") {
+    confirmPassword();
+  }
+});
+
+// foco automático, bem Win95
+if (!isMobile) pwdInput.focus();
+
+
+  makeDraggable(win, win.querySelector(".title-bar"));
+}
+
+
+let explorerCount = 0;
+
+function openExplorer(type) {
+  explorerCount++;
+
+  const win = document.createElement("div");
+  win.className = "window";
+  win.style.display = "block";
+  bringToFront(win);
+  win.style.width = "640px";
+  win.style.height = "380px";
+  win.style.left = 200 + explorerCount * 20 + "px";
+  win.style.top = 120 + explorerCount * 20 + "px";
+
+  const title = type === "computer" ? "My Computer" : "Recycle Bin";
+
+  win.innerHTML = `
+    <div class="title-bar">
+      <span>${title}</span>
+      <button>X</button>
+    </div>
+
+    <div class="menu-bar">File Edit View Tools Help</div>
+
+    <div class="explorer-content"></div>
+
+    <div class="status-bar">0 objects</div>
+  `;
+
+  document.body.appendChild(win);
+
+  const closeBtn = win.querySelector("button");
+  closeBtn.onclick = () => win.remove();
+
+  const content = win.querySelector(".explorer-content");
+  const status = win.querySelector(".status-bar");
+
+  folders[type].forEach(f => {
+    const d = document.createElement("div");
+    d.className = "file";
+
+    d.ondblclick = () => {
+        if (f.action === "openSaber") openNotepad();
+        if (f.action === "openC") openC();
+    };
+
+
+    const i = document.createElement("img");
+    i.src =
+      f.icon === "hdd"
+        ? "https://win98icons.alexmeub.com/icons/png/hard_disk_drive-0.png"
+        : f.icon === "cd"
+        ? "https://win98icons.alexmeub.com/icons/png/cd_drive-0.png"
+        : "https://win98icons.alexmeub.com/icons/png/notepad-0.png";
+
+    const s = document.createElement("span");
+    s.textContent = f.name;
+
+    d.append(i, s);
+    content.appendChild(d);
+  });
+
+  status.textContent = folders[type].length + " objects";
+
+  makeDraggable(win, win.querySelector(".title-bar"));
+}
+
+
+
+
+
+/* ===== NOTEPAD ===== */
+function openNotepad() {
+  const win = document.getElementById("notepadWindow");
+  const content = document.getElementById("notepadContent");
+
+  win.style.display = "block";
+  bringToFront(win);
+
+  // força cálculo real do tamanho do texto
+  requestAnimationFrame(() => {
+    const height = content.scrollHeight + 40; // margem da title bar
+    win.style.height = height + "px";
+  });
+}
+
+function closeNotepad() {
+  document.getElementById("notepadWindow").style.display = "none";
+}
+
+/* ===== DRAG UNIVERSAL ===== */
+function makeDraggable(win, bar) {
+  let drag = false, ox = 0, oy = 0;
+  bar.onmousedown = e => {
+    bringToFront(win);
+    drag = true;
+    ox = e.clientX - win.offsetLeft;
+    oy = e.clientY - win.offsetTop;
+  };
+  document.addEventListener("mousemove", e => {
+    if (drag) {
+      win.style.left = e.clientX - ox + "px";
+      win.style.top = e.clientY - oy + "px";
+    }
+  });
+  document.addEventListener("mouseup", () => drag = false);
+}
+
+
+
+function openAudio(name, src) {
+  const win = document.getElementById("audioWindow");
+  const player = document.getElementById("audioPlayer");
+  const title = document.getElementById("audioTitle");
+
+  title.textContent = name + " - Sound";
+  player.src = src;
+  player.play();
+
+  win.style.display = "block";
+  bringToFront(win);
+
+  makeDraggable(win, document.getElementById("audioBar"));
+}
+
+function closeAudio() {
+  const win = document.getElementById("audioWindow");
+  const player = document.getElementById("audioPlayer");
+
+  player.pause();
+  player.src = "";
+  win.style.display = "none";
+}
+
+function normalizeText(txt) {
+  return txt
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, "")
+    .trim();
+}
+
+
+
+makeDraggable(
+  document.getElementById("notepadWindow"),
+  document.getElementById("notepadBar")
+);
+
+
+
+
+
+window.addEventListener("resize", scaleScreen);
+window.addEventListener("orientationchange", scaleScreen);
+
+
+function makeDraggable(win, bar) {
+  let drag = false, ox = 0, oy = 0;
+
+  function startDrag(x, y) {
+    bringToFront(win);
+    drag = true;
+    ox = x - win.offsetLeft;
+    oy = y - win.offsetTop;
+  }
+
+  function moveDrag(x, y) {
+    if (!drag) return;
+    win.style.left = x - ox + "px";
+    win.style.top = y - oy + "px";
+  }
+
+  function endDrag() {
+    drag = false;
+  }
+
+  bar.addEventListener("mousedown", e => {
+    startDrag(e.clientX, e.clientY);
+  });
+
+  document.addEventListener("mousemove", e => {
+    moveDrag(e.clientX, e.clientY);
+  });
+
+  document.addEventListener("mouseup", endDrag);
+
+  // TOUCH 👇
+  bar.addEventListener("touchstart", e => {
+    const t = e.touches[0];
+    startDrag(t.clientX, t.clientY);
+  });
+
+  document.addEventListener("touchmove", e => {
+    const t = e.touches[0];
+    if (t) moveDrag(t.clientX, t.clientY);
+  }, { passive: false });
+
+  document.addEventListener("touchend", endDrag);
+}
+
+
+</script>
+
+</body>
+</html>
